@@ -9,7 +9,8 @@ import {
   User, 
   Settings,
   Sparkles,
-  LogOut
+  LogOut,
+  ShoppingBag
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -23,6 +24,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Find Mentors", href: "/mentors", icon: Users },
     { name: "Community", href: "/community", icon: MessageCircle },
+    { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
     { name: "Profile", href: "/profile", icon: User },
     { name: "Admin", href: "/admin", icon: Settings },
   ];
