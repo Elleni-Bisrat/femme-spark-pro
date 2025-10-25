@@ -115,6 +115,7 @@ const Mentors = () => {
     return matchesSearch && matchesSpecialties;
   });
 
+
   // Handle request session
   const handleRequestSession = (mentorId: number) => {
     setSessionRequest({
@@ -239,8 +240,9 @@ const Mentors = () => {
           </CardContent>
         </Card>
 
-        {/* Stats */}
-        <div className="grid md:grid-cols-3 gap-4">
+
+        {/* Stats - Removed Average Rating */}
+        <div className="grid md:grid-cols-2 gap-4">
           <Card className="border-border/50">
             <CardContent className="pt-6 text-center">
               <Users className="h-8 w-8 text-primary mx-auto mb-2" />
@@ -255,15 +257,6 @@ const Mentors = () => {
                 {mentors.reduce((acc, mentor) => acc + mentor.sessions, 0)}+
               </div>
               <div className="text-sm text-muted-foreground">Sessions Completed</div>
-            </CardContent>
-          </Card>
-          <Card className="border-border/50">
-            <CardContent className="pt-6 text-center">
-              <Star className="h-8 w-8 text-accent mx-auto mb-2" />
-              <div className="text-2xl font-bold">
-                {(mentors.reduce((acc, mentor) => acc + mentor.rating, 0) / mentors.length).toFixed(1)}
-              </div>
-              <div className="text-sm text-muted-foreground">Average Rating</div>
             </CardContent>
           </Card>
         </div>
@@ -326,6 +319,7 @@ const Mentors = () => {
             </Card>
           ))}
         </div>
+
 
         {/* No Results Message */}
         {filteredMentors.length === 0 && (
@@ -415,6 +409,7 @@ const Mentors = () => {
               <CardContent>
                 <Button 
                   className="w-full bg-primary hover:bg-primary/90"
+
                   onClick={handleSubmitSessionRequest}
                 >
                   <MessageCircle className="h-4 w-4 mr-2" />
@@ -500,6 +495,7 @@ const Mentors = () => {
                     <p className="text-muted-foreground">{selectedMentor.responseTime}</p>
                   </div>
                 </div>
+
 
                 <div className="flex gap-2">
                   <Button 

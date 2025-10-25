@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, BookOpen, TrendingUp, MessageCircle, Sparkles, Target } from "lucide-react";
-import heroImage from "@/assets/hero-entrepreneur.jpg";
+import heroImage from "@/assets/image.png";
 
 const Landing = () => {
   const features = [
@@ -33,12 +33,12 @@ const Landing = () => {
       {/* Navigation */}
       <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               SheRise
             </span>
-          </div>
+          </Link>
           <div className="flex items-center gap-4">
             <Link to="/auth">
               <Button variant="ghost">Login</Button>
@@ -54,9 +54,9 @@ const Landing = () => {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-background" />
         <div className="container mx-auto px-4 py-20 relative">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center ml-8">
             <div className="space-y-6">
-              <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
+              <h1 className="text-5xl lg:text-6xl font-bold leading-tight ">
                 Empower Your
                 <span className="block bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                   Entrepreneurial Journey
@@ -72,9 +72,6 @@ const Landing = () => {
                     Start Your Journey
                   </Button>
                 </Link>
-                <Button size="lg" variant="outline">
-                  Learn More
-                </Button>
               </div>
               <div className="flex gap-8 pt-4">
                 <div>
@@ -153,7 +150,7 @@ const Landing = () => {
       {/* Footer */}
       <footer className="border-t border-border bg-muted/30 py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2025 SheGrow. Empowering women entrepreneurs worldwide.</p>
+          <p>© 2025 SheRise. Empowering women entrepreneurs worldwide.</p>
         </div>
       </footer>
     </div>

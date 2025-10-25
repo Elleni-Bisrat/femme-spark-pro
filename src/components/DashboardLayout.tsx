@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
@@ -19,6 +19,7 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -31,12 +32,21 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const handleAvatarClick = () => {
+    navigate("/profile");
+  };
+
+  const handleLogout = () => {
+    // Add your logout logic here
+    window.location.href = "/";
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Top Navigation */}
       <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to="/dashboard" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               SheRise
@@ -44,10 +54,18 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </Link>
           
           <div className="flex items-center gap-4">
-            <Avatar className="h-8 w-8 cursor-pointer">
+            <Avatar 
+              className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
+              onClick={handleAvatarClick}
+            >
               <AvatarFallback className="bg-primary/10 text-primary">SJ</AvatarFallback>
             </Avatar>
-            <Button variant="ghost" size="icon" onClick={() => window.location.href = "/"}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleLogout}
+              title="Logout"
+            >
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
@@ -84,6 +102,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </main>
         </div>
       </div>
+
 
       {/* Mobile Bottom Navigation */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50">

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Search, ShoppingBag, Star, Package, Heart, Plus, Upload, X, Calendar, User, Shield, Download, MessageCircle, Share2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const Marketplace = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,8 +19,11 @@ const Marketplace = () => {
     category: "Digital Products",
     price: "",
     tags: [] as string[],
-    tagInput: ""
+    tagInput: "",
+    images: [] as File[]
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [products, setProducts] = useState([
     {
@@ -86,6 +89,7 @@ const Marketplace = () => {
       reviews: 15,
       liked: false,
       detailedDescription: "Get personalized brand strategy advice from an experienced consultant. We'll analyze your current brand positioning and provide actionable recommendations to strengthen your brand identity.",
+
       features: ["1-on-1 Session", "Brand Audit", "Strategy Recommendations", "Follow-up Report"],
       requirements: "Business concept or existing brand",
       includes: ["60min Consultation", "Written Report", "Resource List"],
@@ -128,12 +132,6 @@ const Marketplace = () => {
   ]);
 
   const categories = ["All", "Digital Products", "Courses", "Handmade", "Services", "Consulting"];
-  
-  const stats = [
-    { label: "Total Products", value: "150+", icon: Package },
-    { label: "Active Sellers", value: "85", icon: ShoppingBag },
-    { label: "Avg Rating", value: "4.8", icon: Star },
-  ];
 
   // Handle category filter
   const handleCategorySelect = (category: string) => {
@@ -218,6 +216,45 @@ const Marketplace = () => {
     }
   };
 
+
+  // Handle file upload
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setSellerForm(prev => ({
+        ...prev,
+        images: [...prev.images, ...newFiles]
+      }));
+    }
+  };
+
+  // Handle file removal
+  const handleRemoveFile = (index: number) => {
+    setSellerForm(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
+  // Handle drag and drop
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const files = e.dataTransfer.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setSellerForm(prev => ({
+        ...prev,
+        images: [...prev.images, ...newFiles]
+      }));
+    }
+  };
+
+  // Handle drag over
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
+
   // Handle form submission
   const handleSubmitProduct = () => {
     if (sellerForm.productName && sellerForm.description && sellerForm.price) {
@@ -236,7 +273,8 @@ const Marketplace = () => {
         features: sellerForm.tags,
         requirements: "None specified",
         includes: ["Product File", "Support"],
-        lastUpdated: new Date().toISOString().split('T')[0]
+        lastUpdated: new Date().toISOString().split('T')[0],
+        images: sellerForm.images
       };
 
       setProducts([newProduct, ...products]);
@@ -246,7 +284,8 @@ const Marketplace = () => {
         category: "Digital Products",
         price: "",
         tags: [],
-        tagInput: ""
+        tagInput: "",
+        images: []
       });
       setShowSellerModal(false);
     }
@@ -255,7 +294,6 @@ const Marketplace = () => {
   // Handle purchase product
   const handlePurchase = (productId: number) => {
     console.log(`Purchasing product ${productId}`);
-    // In real app: handle payment processing
     alert(`Thank you for your purchase! You've bought: ${selectedProduct?.title}`);
     handleCloseDetails();
   };
@@ -263,8 +301,21 @@ const Marketplace = () => {
   // Handle contact seller
   const handleContactSeller = () => {
     console.log(`Contacting seller: ${selectedProduct?.seller}`);
-    // In real app: open messaging interface
     alert(`Opening chat with ${selectedProduct?.seller}`);
+  };
+
+  // Handle share product
+  const handleShareProduct = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: selectedProduct?.title,
+        text: selectedProduct?.description,
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Product link copied to clipboard!');
+    }
   };
 
   // Filter products based on search and category
@@ -291,22 +342,24 @@ const Marketplace = () => {
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {stats.map((stat) => (
-            <Card key={stat.label}>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
-                    <p className="text-2xl font-bold mt-1">{stat.value}</p>
-                  </div>
-                  <stat.icon className="h-8 w-8 text-primary/60" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+
+        {/* Start Selling Section - Replaced Stats */}
+        <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-bold">Ready to sell your products?</h3>
+                <p className="text-muted-foreground mt-1">
+                  Join our marketplace and reach thousands of potential customers
+                </p>
+              </div>
+              <Button size="lg" className="whitespace-nowrap" onClick={handleStartSelling}>
+                <Plus className="h-4 w-4 mr-2" />
+                Start Selling
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Search and Categories */}
         <div className="space-y-4">
@@ -351,6 +404,7 @@ const Marketplace = () => {
                   className={`h-4 w-4 ${product.liked ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} 
                 />
               </button>
+
 
               <CardHeader>
                 <div className="aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 rounded-md mb-4 flex items-center justify-center">
@@ -430,6 +484,7 @@ const Marketplace = () => {
                       <div className="flex items-center gap-1">
                         <Star className="h-5 w-5 fill-accent text-accent" />
                         <span className="font-medium">{selectedProduct.rating}</span>
+
                         <span className="text-sm text-muted-foreground">({selectedProduct.reviews} reviews)</span>
                       </div>
                     </div>
@@ -464,17 +519,6 @@ const Marketplace = () => {
                         Contact
                       </Button>
                     </div>
-                    
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Shield className="h-4 w-4" />
-                        <span>Secure Payment</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Download className="h-4 w-4" />
-                        <span>Instant Download</span>
-                      </div>
-                    </div>
                   </div>
                 </div>
 
@@ -507,6 +551,7 @@ const Marketplace = () => {
                   </div>
                 )}
 
+
                 {/* Product Info */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
                   <div className="text-center">
@@ -537,22 +582,32 @@ const Marketplace = () => {
                   Back to Marketplace
                 </Button>
                 <div className="flex gap-2">
-                  <Button variant="outline">
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="flex items-center gap-2"
+                    onClick={handleShareProduct}
+                  >
+                    <Share2 className="h-4 w-4" />
+                    <span className="hidden sm:inline">Share</span>
                   </Button>
                   <Button 
                     variant={selectedProduct.liked ? "default" : "outline"}
+                    size="sm"
+                    className="flex items-center gap-2"
                     onClick={(e) => handleWishlistToggle(selectedProduct.id, e)}
                   >
-                    <Heart className={`h-4 w-4 mr-2 ${selectedProduct.liked ? "fill-current" : ""}`} />
-                    {selectedProduct.liked ? "Saved" : "Save"}
+                    <Heart className={`h-4 w-4 ${selectedProduct.liked ? "fill-current" : ""}`} />
+                    <span className="hidden sm:inline">
+                      {selectedProduct.liked ? "Saved" : "Save"}
+                    </span>
                   </Button>
                 </div>
               </CardFooter>
             </Card>
           </div>
         )}
+
 
         {/* Seller Modal */}
         {showSellerModal && (
@@ -635,6 +690,7 @@ const Marketplace = () => {
                   </div>
                 </div>
 
+
                 {/* Tags */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">
@@ -664,21 +720,66 @@ const Marketplace = () => {
                   </div>
                 </div>
 
-                {/* Image Upload (Placeholder) */}
+                {/* Functional Image Upload */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">
                     Product Images
                   </label>
-                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-md p-8 text-center">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <div 
+                    className="border-2 border-dashed border-muted-foreground/25 rounded-md p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                    onClick={() => fileInputRef.current?.click()}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                  >
                     <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground mb-2">
                       Drag & drop images here or click to upload
                     </p>
-                    <Button variant="outline" className="mt-2">
+                    <p className="text-xs text-muted-foreground mb-4">
+                      Supports JPG, PNG, WEBP - Max 5MB each
+                    </p>
+                    <Button variant="outline" type="button">
                       Choose Files
                     </Button>
                   </div>
+                  
+                  {/* Uploaded Files Preview */}
+                  {sellerForm.images.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-sm font-medium mb-2">Uploaded Images:</p>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {sellerForm.images.map((file, index) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-md border"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveFile(index)}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                            <p className="text-xs text-muted-foreground truncate mt-1">
+                              {file.name}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
+
               </CardContent>
 
               <CardFooter className="flex gap-2 justify-end">
@@ -698,23 +799,6 @@ const Marketplace = () => {
             </Card>
           </div>
         )}
-
-        {/* Call to Action */}
-        <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div>
-                <h3 className="text-xl font-bold">Want to sell your products?</h3>
-                <p className="text-muted-foreground mt-1">
-                  Join our marketplace and reach thousands of potential customers
-                </p>
-              </div>
-              <Button size="lg" className="whitespace-nowrap" onClick={handleStartSelling}>
-                Start Selling
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </DashboardLayout>
   );

@@ -6,20 +6,19 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { useState, useEffect } from "react";
 
 const Dashboard = () => {
-  const [growthProgress, setGrowthProgress] = useState(65);
-  const [hoursLearned, setHoursLearned] = useState(12);
-  const [connections, setConnections] = useState(5);
+  const [growthProgress, setGrowthProgress] = useState(0); // Set to 0 at beginning
   const [recentActivity, setRecentActivity] = useState([
     { id: 1, type: "course", title: "Completed Social Media Marketing", time: "2 hours ago", completed: true },
     { id: 2, type: "connection", title: "Connected with Dr. Lisa Anderson", time: "1 day ago", completed: true },
     { id: 3, type: "community", title: "Posted in Community Forum", time: "2 days ago", completed: true },
     { id: 4, type: "workshop", title: "Upcoming: Funding Strategies", time: "Tomorrow", completed: false },
+    { id: 5, type: "goal", title: "Set new goal: Launch E-commerce Store", time: "3 days ago", completed: false },
   ]);
 
   const [goals, setGoals] = useState([
-    { id: 1, title: "Launch E-commerce Store", progress: 75, deadline: "2024-03-15", active: true },
-    { id: 2, title: "Complete Business Plan", progress: 40, deadline: "2024-02-28", active: true },
-    { id: 3, title: "Secure First 10 Customers", progress: 20, deadline: "2024-04-01", active: true },
+    { id: 1, title: "Launch E-commerce Store", status: "in-progress", deadline: "2024-03-15", active: true },
+    { id: 2, title: "Complete Business Plan", status: "not-done", deadline: "2024-02-28", active: true },
+    { id: 3, title: "Secure First 10 Customers", status: "not-done", deadline: "2024-04-01", active: true },
   ]);
 
   const [newGoal, setNewGoal] = useState({ title: "", deadline: "" });
@@ -41,32 +40,13 @@ const Dashboard = () => {
       description: "Engage with other entrepreneurs"
     },
     { 
-      icon: BookOpen, 
-      label: "Browse Courses", 
-      href: "#", 
-      color: "text-accent",
-      description: "Continue learning"
-    },
-    { 
       icon: Calendar, 
       label: "Book Workshop", 
-      href: "#", 
+      href: "/workshops", 
       color: "text-primary",
       description: "Join live sessions"
     },
   ];
-
-  const milestones = [
-    { id: 1, title: "Profile Completed", completed: true, points: 50 },
-    { id: 2, title: "First Connection Made", completed: true, points: 100 },
-    { id: 3, title: "Attended Workshop", completed: false, points: 150 },
-    { id: 4, title: "Launched First Product", completed: false, points: 300 },
-  ];
-
-  // Calculate total points from completed milestones
-  const totalPoints = milestones
-    .filter(milestone => milestone.completed)
-    .reduce((sum, milestone) => sum + milestone.points, 0);
 
   // Simulate progress increase over time
   useEffect(() => {
@@ -89,52 +69,6 @@ const Dashboard = () => {
     alert(`Navigating to ${href}`);
   };
 
-  // Toggle milestone completion
-  const toggleMilestone = (milestoneId: number) => {
-    setMilestones(prev => 
-      prev.map(milestone => 
-        milestone.id === milestoneId 
-          ? { ...milestone, completed: !milestone.completed }
-          : milestone
-      )
-    );
-  };
-
-  // Add hours learned (simulate learning activity)
-  const addLearningTime = () => {
-    setHoursLearned(prev => prev + 1);
-    setGrowthProgress(prev => Math.min(prev + 5, 100));
-    
-    // Add to recent activity
-    setRecentActivity(prev => [
-      {
-        id: Date.now(),
-        type: "course",
-        title: "Added 1 hour of learning",
-        time: "Just now",
-        completed: true
-      },
-      ...prev
-    ]);
-  };
-
-  // Add a connection (simulate networking)
-  const addConnection = () => {
-    setConnections(prev => prev + 1);
-    setGrowthProgress(prev => Math.min(prev + 3, 100));
-    
-    setRecentActivity(prev => [
-      {
-        id: Date.now(),
-        type: "connection",
-        title: "Made a new connection",
-        time: "Just now",
-        completed: true
-      },
-      ...prev
-    ]);
-  };
-
   // Handle new goal input
   const handleNewGoalChange = (field: string, value: string) => {
     setNewGoal(prev => ({
@@ -149,7 +83,7 @@ const Dashboard = () => {
       const goal = {
         id: Date.now(),
         title: newGoal.title,
-        progress: 0,
+        status: "not-done",
         deadline: newGoal.deadline,
         active: true
       };
@@ -158,6 +92,7 @@ const Dashboard = () => {
       setNewGoal({ title: "", deadline: "" });
       setShowAddGoal(false);
       
+      // Add to recent activity
       setRecentActivity(prev => [
         {
           id: Date.now(),
@@ -171,15 +106,30 @@ const Dashboard = () => {
     }
   };
 
-  // Update goal progress
-  const updateGoalProgress = (goalId: number, increment: number) => {
+  // Update goal status
+  const updateGoalStatus = (goalId: number, newStatus: string) => {
     setGoals(prev => 
       prev.map(goal => 
         goal.id === goalId 
-          ? { ...goal, progress: Math.min(goal.progress + increment, 100) }
+          ? { ...goal, status: newStatus }
           : goal
       )
     );
+
+    // Update recent activity when goal status changes
+    const goal = goals.find(g => g.id === goalId);
+    if (goal) {
+      setRecentActivity(prev => [
+        {
+          id: Date.now(),
+          type: "goal",
+          title: `Updated goal: ${goal.title} - ${newStatus}`,
+          time: "Just now",
+          completed: newStatus === "done"
+        },
+        ...prev
+      ]);
+    }
   };
 
   // Calculate days until deadline
@@ -191,37 +141,37 @@ const Dashboard = () => {
     return diffDays;
   };
 
+  // Get status color
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "done": return "bg-green-500";
+      case "in-progress": return "bg-yellow-500";
+      case "not-done": return "bg-gray-300";
+      default: return "bg-gray-300";
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         {/* Welcome Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Welcome back, Sarah! 👋</h1>
+            <h1 className="text-3xl font-bold mb-2">Welcome back</h1>
             <p className="text-muted-foreground">
-              Continue your entrepreneurial journey. You have {totalPoints} achievement points!
+              Continue your entrepreneurial journey.
             </p>
-          </div>
-          <div className="flex gap-2">
-            <Button onClick={addLearningTime} variant="outline" size="sm">
-              <BookOpen className="h-4 w-4 mr-2" />
-              Add Learning
-            </Button>
-            <Button onClick={addConnection} variant="outline" size="sm">
-              <Users className="h-4 w-4 mr-2" />
-              Add Connection
-            </Button>
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Growth Progress */}
+        {/* Stats Grid - Single Card for Market Progress */}
+        <div className="grid grid-cols-1 gap-4">
+          {/* Growth Progress - Renamed to Market Progress */}
           <Card className="border-border/50">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <TrendingUp className="h-4 w-4 text-primary" />
-                Growth Progress
+                Your Market Progress
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -232,34 +182,6 @@ const Dashboard = () => {
                 </div>
                 <Progress value={growthProgress} className="h-2" />
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Hours Learned */}
-          <Card className="border-border/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <BookOpen className="h-4 w-4 text-accent" />
-                Hours Learned
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-accent">{hoursLearned}</div>
-              <p className="text-sm text-muted-foreground">Total learning time</p>
-            </CardContent>
-          </Card>
-
-          {/* Connections */}
-          <Card className="border-border/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <Users className="h-4 w-4 text-secondary" />
-                Connections
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-secondary">{connections}</div>
-              <p className="text-sm text-muted-foreground">Network members</p>
             </CardContent>
           </Card>
         </div>
@@ -331,6 +253,13 @@ const Dashboard = () => {
                       <Button onClick={handleAddGoal} size="sm">
                         Add
                       </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setShowAddGoal(false)}
+                      >
+                        Cancel
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -345,29 +274,17 @@ const Dashboard = () => {
                           {getDaysUntilDeadline(goal.deadline)} days left
                         </span>
                       </div>
-                      <div className="space-y-1">
-                        <Progress value={goal.progress} className="h-2" />
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>{goal.progress}% complete</span>
-                          <div className="flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 px-2"
-                              onClick={() => updateGoalProgress(goal.id, 10)}
-                            >
-                              +10%
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 px-2"
-                              onClick={() => updateGoalProgress(goal.id, 25)}
-                            >
-                              +25%
-                            </Button>
-                          </div>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={goal.status}
+                          onChange={(e) => updateGoalStatus(goal.id, e.target.value)}
+                          className="p-2 border rounded-md text-sm"
+                        >
+                          <option value="not-done">Not Done</option>
+                          <option value="in-progress">In Progress</option>
+                          <option value="done">Done</option>
+                        </select>
+                        <div className={`h-3 w-3 rounded-full ${getStatusColor(goal.status)}`}></div>
                       </div>
                     </div>
                   ))}
@@ -378,56 +295,7 @@ const Dashboard = () => {
 
           {/* Right Column */}
           <div className="space-y-6">
-            {/* Milestones */}
-            <Card className="border-border/50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-accent" />
-                  Your Milestones
-                </CardTitle>
-                <CardDescription>Track your entrepreneurial achievements</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {milestones.map((milestone) => (
-                    <div
-                      key={milestone.id}
-                      className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
-                      onClick={() => toggleMilestone(milestone.id)}
-                    >
-                      <div
-                        className={`h-6 w-6 rounded-full flex items-center justify-center transition-colors ${
-                          milestone.completed
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted border-2 border-border"
-                        }`}
-                      >
-                        {milestone.completed && "✓"}
-                      </div>
-                      <div className="flex-1">
-                        <span
-                          className={
-                            milestone.completed
-                              ? "text-foreground font-medium"
-                              : "text-muted-foreground"
-                          }
-                        >
-                          {milestone.title}
-                        </span>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Star className="h-3 w-3 text-yellow-500" />
-                          <span className="text-xs text-muted-foreground">
-                            {milestone.points} points
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Activity */}
+            {/* Recent Activity - Limited to 5 items */}
             <Card className="border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -438,7 +306,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {recentActivity.map((activity) => (
+                  {recentActivity.slice(0, 5).map((activity) => (
                     <div
                       key={activity.id}
                       className="flex items-start gap-3 p-3 rounded-lg border border-border/50"
