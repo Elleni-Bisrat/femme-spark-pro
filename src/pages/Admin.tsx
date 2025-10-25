@@ -25,7 +25,7 @@ const Admin = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header */}
+        
         <div>
           <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
           <p className="text-muted-foreground">
